@@ -35,16 +35,16 @@ class TestBoard(unittest.TestCase):
                              "Did not successfully set the piece for player %s at coordinates %s" % (player, coord))
 
     def test_set_piece_at_fails(self):
-        for coords in union(TestBoard.PLAYER_PIECES, TestBoard.COMPUTER_PIECES):
+        for coords in TestBoard.PLAYER_PIECES + TestBoard.COMPUTER_PIECES:
             self.assertRaises(ValueError, self.test_board.set_piece_at(coords, random.choice([1,2])))
 
     def test_get_field(self):
         for coords in TestBoard.PLAYER_PIECES:
             self.assertEqual(self.test_board.get_field(coords), 1,
-                             "Did not successfully set the player piece at coordinates %s" % coords)
+                             "Did not successfully set the player piece at coordinates %s" % (coords))
         for coords in TestBoard.COMPUTER_PIECES:
             self.assertEqual(self.test_board.get_field(coords), 2,
-                             "Did not successfully set the computer piece at coordinates %s" % coords)
+                             "Did not successfully set the computer piece at coordinates %s" % (coords))
     
 
 if __name__ == '__main__':
