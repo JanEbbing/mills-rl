@@ -16,7 +16,9 @@ class Board:
 
     def is_valid_coordinate(self, coords):
         (a,b,c) = coords
-        return b == 1 and c == 1
+        if not coords <= [0, 1, 2]:
+            return False
+        return b != 1 or c != 1
 
     def get_field(self, coords):
         (i,j,k) = coords
@@ -58,16 +60,74 @@ class Board:
         return result
 
     def check_mill(self, coords):
-        """Checks if a player just closed a mill at the given coordinates."""
+        """Checks if a player just closed a mill at the given coordinates.
+        Returns a dictionary of the form player_id:number_of_closed_mills"""
         row = set(self.get_neighboring_row(coords))
         column = set(self.get_neighboring_column(coords))
         if len(row) == 1:
-            return row.pop()
-        # TODO Check rules of mills, with double mill
-        
+            row_winner = row.pop()
+        if len(column) == 1:
+            col_winner = column.pop()
+        result = { 1 : 0, 2 : 0 }
+        if row_winner:
+            result[row_winner] += 1
+        if col_winner:
+            result[col_winner] += 1
+        return result
+
+    def get_empty_coords(self):
+        result = []
+        for (i,j,k) in product(range(3), range(3), range(3)):
+            if not self.get_field((i,j,k)):
+                result.append((i,j,k))
+        return result
+
+    def get_removeable_pieces(self, player_id):
+        result = []
+        for coords in filter(self.is_valid_coordinate, product(range(3), range(3), range(3))):
+            if self.get_field(coords):
+                mills = self.check_mill(coords)
+                if not mills[player_id]:
+                    result.append(coords)
+        return result
+
+    def get_empty_neighbors(self, coords):
+        result = []
+        neighbors = self.get_neighbors(coords)
+        for neighbor in neighbors:
+            if not self.get_field(neighbor):
+                result.append(neighbor)
+        return result
+
+    def get_neighbors(self, coords):
+        (i,j,k) = coords
+        result = []
+        # Neighbors in the same row
+        if j in [0, 2]: # Neighbors are in the same ring too
+            neighboring = self._get_neighboring_indices(k)
+            for n in neighboring:
+                result.append((i,j,n))
+        else: # Neighbors are in the other rings
+            neighboring = self._get_neighboring_indices(i)
+            for n in neighboring:
+                result.append((n,j,k))
+        # Neighbors in the same column
+        if k in [0, 2]: # Neighbors are in the same ring too
+            neighboring = self._get_neighboring_indices(j)
+            for n in neighboring:
+                result.append((i,n,k))
+        else: # Neighbors are in other rings
+            neighboring = self._get_neighboring_indices(i)
+            for n in neighboring:
+                result.append((n,j,k))
+        return result
+
+    def _get_neighboring_indices(self, index):
+        if index == 1:
+            return [0, 2]
+        else:
+            return 1
 
 
 if __name__ == "__main__":
-    b = Board()
-    print(b.board)
-    print("finished")
+    pass
