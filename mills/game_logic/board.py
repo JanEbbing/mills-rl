@@ -16,7 +16,7 @@ class Board:
 
     def is_valid_coordinate(self, coords):
         (a,b,c) = coords
-        if not set(coords) <= [0, 1, 2]:
+        if not set(coords) <= {0, 1, 2}:
             return False
         return b != 1 or c != 1
 
