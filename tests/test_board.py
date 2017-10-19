@@ -47,22 +47,22 @@ class TestBoard(unittest.TestCase):
             self.assertEqual(self.test_board.get_field(coords), 2,
                              "Did not successfully set the computer piece at coordinates %s" % (coords, ))
 
-    def test_get_row(self):
+    def test_get_row_values(self):
         test_data = [ ((0,0,0), [(0,0,0), (0,0,1), (0,0,2)]), ((0,0,2), [(0,0,0), (0,0,1), (0,0,2)]),
                       ((2,1,0), [(0,1,0), (1,1,0), (2,1,0)]), ((2,1,2), [(0,1,2), (1,1,2), (2,1,2)]),
                       ((1,2,0), [(1,2,0), (1,2,1), (1,2,2)])]
         for (coords, expected_row) in test_data:
-            actual_row = self.test_board.get_row(coords)
-            self.assertEqual(expected_row, actual_row,
+            actual_row = self.test_board.get_row_values(coords)
+            self.assertEqual(map(self.test_board.get_field, expected_row), actual_row,
                              "Expected and actual row did not match for coordinates %s ! Expected: %s, actual: %s" % (coords, expected_row, actual_row))
 
-    def test_get_column(self):
+    def test_get_column_values(self):
         test_data = [ ((0,0,0), [(0,0,0), (0,1,0), (0,2,0)]), ((0,0,2), [(0,0,2), (0,1,2), (0,2,2)]),
                       ((0,2,0), [(0,0,0), (0,1,0), (0,2,0)]), ((2,1,0), [(2,0,0), (2,1,0), (2,2,0)]),
                       ((2,1,2), [(2,0,2), (2,1,2), (2,2,2)]), ((1,2,0), [(1,0,0), (1,1,0), (1,2,0)])]
         for (coords, expected_column) in test_data:
-            actual_column = self.test_board.get_column(coords)
-            self.assertEqual(expected_column, actual_column,
+            actual_column = self.test_board.get_column_values(coords)
+            self.assertEqual(map(self.test_board.get_field, expected_column), actual_column,
                              "Expected and actual column did not match for coordinates %s ! Expected: %s, actual: %s" % (coords, expected_column, actual_column))
 
     def test_get_empty_coords(self):

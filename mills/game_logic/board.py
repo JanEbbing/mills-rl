@@ -31,7 +31,7 @@ class Board:
         else:
             raise ValueError("Trying to overwrite occupied field.")
 
-    def get_row(self, coords):
+    def get_row_values(self, coords):
         """Returns the values of the row this field is on"""
         (i,j,k) = coords
         result = []
@@ -45,7 +45,7 @@ class Board:
                 result.append(self.get_field((a,j,k)))
         return result
 
-    def get_column(self, coords):
+    def get_column_values(self, coords):
         """Returns the values of the column this field is on"""
         (i,j,k) = coords
         result = []
@@ -62,8 +62,9 @@ class Board:
     def check_mill(self, coords):
         """Checks if a player just closed a mill at the given coordinates.
         Returns a dictionary of the form player_id:number_of_closed_mills"""
-        row = set(self.get_row(coords))
-        column = set(self.get_column(coords))
+        row = set(self.get_row_values(coords))
+        column = set(self.get_column_values(coords))
+        row_winner = col_winner = 0
         if len(row) == 1:
             row_winner = row.pop()
         if len(column) == 1:
@@ -129,7 +130,7 @@ class Board:
         if index == 1:
             return [0, 2]
         else:
-            return 1
+            return [1]
 
 
 if __name__ == "__main__":
