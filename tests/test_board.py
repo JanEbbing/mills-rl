@@ -53,7 +53,7 @@ class TestBoard(unittest.TestCase):
                       ((1,2,0), [(1,2,0), (1,2,1), (1,2,2)])]
         for (coords, expected_row) in test_data:
             actual_row = self.test_board.get_row_values(coords)
-            self.assertEqual(map(self.test_board.get_field, expected_row), actual_row,
+            self.assert_list_content_equals(map(self.test_board.get_field, expected_row), actual_row,
                              "Expected and actual row did not match for coordinates %s ! Expected: %s, actual: %s" % (coords, expected_row, actual_row))
 
     def test_get_column_values(self):
@@ -62,7 +62,7 @@ class TestBoard(unittest.TestCase):
                       ((2,1,2), [(2,0,2), (2,1,2), (2,2,2)]), ((1,2,0), [(1,0,0), (1,1,0), (1,2,0)])]
         for (coords, expected_column) in test_data:
             actual_column = self.test_board.get_column_values(coords)
-            self.assertEqual(map(self.test_board.get_field, expected_column), actual_column,
+            self.assert_list_content_equals(map(self.test_board.get_field, expected_column), actual_column,
                              "Expected and actual column did not match for coordinates %s ! Expected: %s, actual: %s" % (coords, expected_column, actual_column))
 
     def test_get_empty_coords(self):
@@ -71,8 +71,9 @@ class TestBoard(unittest.TestCase):
             self.assertFalse(self.test_board.get_field(coords))
         from itertools import chain
         board_as_list = list(chain.from_iterable(chain.from_iterable(self.test_board.board)))
-        self.assertEqual(len(board_as_list) - len(TestBoard.PLAYER_PIECES) - len (TestBoard.COMPUTER_PIECES) + 3,
-                         len(empty_fields), "Number of empty fields is not correct.") # +3 because of the 3 invalid coordinates 0,1,1; 1,1,1; 2,1,1
+        expected_empty_fields = 24 - len(TestBoard.PLAYER_PIECES) - len (TestBoard.COMPUTER_PIECES)
+        self.assertEqual(expected_empty_fields, len(empty_fields),
+                         "Number of empty fields is not correct. Expected %s but actual was %s" % (expected_empty_fields, len(empty_fields))) # +3 because of the 3 invalid coordinates 0,1,1; 1,1,1; 2,1,1
 
     def test_get_empty_coords_full(self):
         empty_fields = self.test_board.get_empty_coords()
@@ -87,39 +88,54 @@ class TestBoard(unittest.TestCase):
         one_player = {1 : 1, 2 : 0}
         two_player = {1 : 2, 2 : 0}
         one_computer = {1 : 0, 2: 1}
-        two_compuer = {1 : 0, 2 : 2}
+        two_computer = {1 : 0, 2 : 2}
         nothing = {1 : 0, 2 : 0}
-        for coords in [(0,0,0), (0,1,0), (1,2,1), (1,0,0), (1,0,1), (2,2,2), (1,1,0), (1,2,0)]:
-            self.assertEqual(self.test_board.check_mill(coords), nothing, "Found a mill where there is none.")
+        for coords in [(0,0,0), (0,1,0), (1,2,1), (1,0,0), (2,2,2), (1,0,2), (1,1,0), (1,2,0)]:
+            self.assert_dict_content_equals(self.test_board.check_mill(coords), nothing, "Found a mill at coords %s where there is none." % (coords,))
         for coords in [(0,0,1), (1,0,1), (2,0,1)]:
-            self.assertEqual(self.test_board.check_mill(coords), one_player,
-                             "Did not find a mill where I expected one by the player.")
+            self.assert_dict_content_equals(self.test_board.check_mill(coords), one_player,
+                             "Did not find a mill at coords %s where I expected one by the player." % (coords,))
         for coords in []:
-            self.assertEqual(self.test_board.check_mill(coords), two_player,
-                             "Did not find two mills at once where I expected them by the player.")
+            self.assert_dict_content_equals(self.test_board.check_mill(coords), two_player,
+                             "Did not find two mills at once at coords %s where I expected them by the player." % (coords,))
         for coords in [(0,0,2), (0,1,2), (0,2,0), (0,2,1)]:
-            self.assertEqual(self.test_board.check_mill(coords), one_computer,
-                             "Did not find a mill where I expected one by the computer.")
+            self.assert_dict_content_equals(self.test_board.check_mill(coords), one_computer,
+                             "Did not find a mill at coords %s where I expected one by the computer." % (coords,))
         for coords in [(0,2,2)]:
-            self.assertEqual(self.test_board.check_mill(coords), two_computer,
-                             "Did not find two mills at once where I expected them by the computer.")
+            self.assert_dict_content_equals(self.test_board.check_mill(coords), two_computer,
+                             "Did not find two mills at once at coords %s where I expected them by the computer." % (coords,))
 
     def test_get_neighbors(self):
         test_data = [((0,0,0), [(0,1,0), (0,0,1)]), ((1,1,0), [(0,1,0), (2,1,0), (1,0,0), (1,2,0)]),
                      ((2,2,2), [(2,1,2), (2,2,1)]), ((2,1,2), [(2,0,2), (2,2,2), (1,1,2)])]
         for (coords, expected_neighbors) in test_data:
             actual_neighbors = self.test_board.get_neighbors(coords)
-            self.assertEqual(actual_neighbors, expected_neighbors,
+            self.assert_list_content_equals(actual_neighbors, expected_neighbors,
                              "For coordinates %s I expected the neighbors %s but I received %s!" % (coords, expected_neighbors, actual_neighbors))
 
     def test_get_empty_neighbors(self):
-        test_data = [((0,0,0), [0,1,0]), ((1,0,0),[]), ((1,0,1), [(1,0,2)]), ((2,0,1), [(2,0,0), (2,0,2)]),
-                     ((2,2,2), [(2,1,2), (2,2,1)]), ((0,0,2), []), ((0,2,1), [(1,0,1)])]
+        test_data = [((0,0,0), [(0,1,0)]), ((1,0,0),[]), ((1,0,1), [(1,0,2)]), ((2,0,1), [(2,0,0), (2,0,2)]),
+                     ((2,2,2), [(2,1,2), (2,2,1)]), ((0,0,2), []), ((0,2,1), [(1,2,1)])]
         for (coords, expected_empty_neighbors) in test_data:
             actual_empty_neighbors = self.test_board.get_empty_neighbors(coords)
-            self.assertEqual(actual_empty_neighbors, expected_empty_neighbors,
+            self.assert_list_content_equals(actual_empty_neighbors, expected_empty_neighbors,
                              "At coordinates %s I expected the empty neighbor indices %s but I received %s" % (coords, expected_empty_neighbors, actual_empty_neighbors))
 
+    def assert_list_content_equals(self, list1, list2, message=""):
+        self.assertEquals(len(list1), len(list2), "Lists dont have the same length!\n List1: %s\n List2: %s" % (list1, list2))
+        for entry in list1:
+            try:
+              list2.remove(entry)
+            except ValueError:
+              self.fail("The lists are not identical!\n List1: %s\n List2: %s\n" % (list1, list2) + message)
+        self.assertFalse(list2, message)
+
+    def assert_dict_content_equals(self, dict1, dict2, message=""):
+        keys1 = dict1.keys()
+        keys2 = dict2.keys()
+        self.assert_list_content_equals(keys1, keys2, message)
+        for key in keys1:
+            self.assertEquals(dict1[key], dict2[key], "The dictionaries are not the same! Values for key %s differ!\n Dict1: %s\n Dict 2: %s\n" % (key, dict1, dict2) + message)
 
 if __name__ == '__main__':
     unittest.main()
