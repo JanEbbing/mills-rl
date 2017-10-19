@@ -31,7 +31,7 @@ class Board:
         else:
             raise ValueError("Trying to overwrite occupied field.")
 
-    def get_neighboring_row(self, coords):
+    def get_row(self, coords):
         """Returns the values of the row this field is on"""
         (i,j,k) = coords
         result = []
@@ -45,7 +45,7 @@ class Board:
                 result.append(self.get_field((a,j,k)))
         return result
 
-    def get_neighboring_column(self, coords):
+    def get_column(self, coords):
         """Returns the values of the column this field is on"""
         (i,j,k) = coords
         result = []
@@ -62,8 +62,8 @@ class Board:
     def check_mill(self, coords):
         """Checks if a player just closed a mill at the given coordinates.
         Returns a dictionary of the form player_id:number_of_closed_mills"""
-        row = set(self.get_neighboring_row(coords))
-        column = set(self.get_neighboring_column(coords))
+        row = set(self.get_row(coords))
+        column = set(self.get_column(coords))
         if len(row) == 1:
             row_winner = row.pop()
         if len(column) == 1:
@@ -77,17 +77,20 @@ class Board:
 
     def get_empty_coords(self):
         result = []
-        for (i,j,k) in product(range(3), range(3), range(3)):
+        for (i,j,k) in filter(self.is_valid_coordinate, product(range(3), range(3), range(3))):
             if not self.get_field((i,j,k)):
                 result.append((i,j,k))
         return result
 
-    def get_removeable_pieces(self, player_id):
+    def get_removeable_pieces(self, player_id, override = False):
+        """Returns a list of all pieces of the player that are not currently protected by a mill.
+        The special case that pieces are not protected when a player only has 3 pieces remaining is
+        implemented with the override flag. If it is true, mills don't protect pieces."""
         result = []
         for coords in filter(self.is_valid_coordinate, product(range(3), range(3), range(3))):
-            if self.get_field(coords):
+            if self.get_field(coords) == player_id:
                 mills = self.check_mill(coords)
-                if not mills[player_id]:
+                if not mills[player_id] or override:
                     result.append(coords)
         return result
 
